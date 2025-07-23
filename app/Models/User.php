@@ -18,9 +18,20 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'user_name',
+        'user_surname',
+        'user_othername',
+        'user_status',
+        'user_email',
+        'user_telephone',
+        'user_gender',
+        'user_password',
+        'user_date_added',
+        'user_added_by',
+        'user_role',
+        'user_forgot_password',
+        'user_active',
+        'check_number',
     ];
 
     /**
@@ -44,5 +55,16 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // Example relationship: a user belongs to a department (if user_department_id exists)
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'user_department_id');
+    }
+
+    public function requisitions()
+    {
+        return $this->hasMany(Requisition::class, 'req_added_by');
     }
 }
