@@ -116,9 +116,16 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="fas fa-sign-out-alt me-2"></i> Logout
-                        </a>
+                        @if(Auth::check())
+        <li class="nav-item mb-2"><a href="{{ route('users.edit', Auth::id()) }}" class="nav-link">Account Settings</a></li>
+        <li class="nav-item mb-2">
+            <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                @csrf
+                <button type="submit" class="btn btn-link nav-link" style="padding:0;">Logout</button>
+            </form>
+        </li>
+    @endif
+                       
                     </li>
                 </ul>
             </nav>

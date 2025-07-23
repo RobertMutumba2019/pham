@@ -129,7 +129,22 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $user = User::findOrFail($id);
+        $request->validate([
+            'user_surname' => 'required|string',
+            'user_othername' => 'required|string',
+            'user_email' => 'required|email|unique:users,user_email,' . $user->id,
+            'user_gender' => 'required|string',
+            'user_role' => 'required|integer',
+        ]);
+        $user->user_surname = $request->user_surname;
+        $user->user_othername = $request->user_othername;
+        $user->user_email = $request->user_email;
+        $user->user_telephone = $request->user_telephone;
+        $user->user_gender = $request->user_gender;
+        $user->user_role = $request->user_role;
+        $user->save();
+        return redirect()->route('users.index')->with('status', 'User updated successfully!');
     }
 
     /**
@@ -276,5 +291,13 @@ class UserController extends Controller
         // Delete the reset token
         DB::table('password_resets')->where('email', $request->email)->delete();
         return redirect()->route('login')->with('status', 'Your username and password have been updated. You can now log in.');
+    }
+
+    public function logout(Request $request)
+    {
+        \Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('login');
     }
 }

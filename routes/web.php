@@ -27,6 +27,7 @@ use App\Http\Controllers\ApprovalOrderController;
 
 Route::get('/', [UserController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [UserController::class, 'login'])->name('users.login');
+Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 
 Route::get('/dashboard', function () {
     return view('dashboard');

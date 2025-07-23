@@ -72,6 +72,19 @@ class User extends Authenticatable
     {
         return $this->belongsTo(\App\Models\UserRole::class, 'user_role', 'id'); // Adjust 'id' if your PK is different
     }
+
+    public function hasRight($page, $action)
+    {
+        $roleId = $this->user_role;
+        $rightColumn = 'ar_' . strtolower($action); // e.g., ar_a, ar_v, ar_e, etc.
+        $access = \App\Models\AccessRight::where('ar_role_id', $roleId)
+            ->where('ar_page', $page)
+            ->first();
+        if ($access && isset($access[$rightColumn])) {
+            return $access[$rightColumn] == 1;
+        }
+        return false;
+    }
 }
 
 

@@ -20,7 +20,9 @@
             <tr>
                 <td>{{ $role->ur_name }}</td>
                 <td>
-                    <a href="{{ route('access-rights.edit', $role->id) }}" class="btn btn-sm btn-primary">Edit Privileges</a>
+                    @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
+                        <a href="{{ route('access-rights.edit', $role->id) }}" class="btn btn-sm btn-primary">Edit Privileges</a>
+                    @endif
                 </td>
             </tr>
             @endforeach

@@ -6,7 +6,9 @@
 <div class="container">
     <h2>System Users</h2>
     <div class="mb-3">
-        <a href="{{ route('users.create') }}" class="btn btn-success">Add User</a>
+        @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
+            <a href="{{ route('users.create') }}" class="btn btn-success">Add User</a>
+        @endif
     </div>
     <form method="GET" class="mb-3">
         <div class="row g-2">
@@ -47,11 +49,14 @@
                 <td>{{ $user->user_active ? 'Active' : 'Locked' }}</td>
                 <td>{{ $user->role ? $user->role->ur_name : '' }}</td>
                 <td>
-                    <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                    </form>
+                    @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
+                        <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary btn-sm">Edit</a>
+                        <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    @endif
                 </td>
             </tr>
             @endforeach

@@ -9,7 +9,9 @@
         <div class="alert alert-success">{{ session('status') }}</div>
     @endif
     <div class="mb-3">
-        <a href="{{ route('designations.create') }}" class="btn btn-success">Add Designation</a>
+        @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
+            <a href="{{ route('designations.create') }}" class="btn btn-success">Add Designation</a>
+        @endif
     </div>
     <table class="table table-bordered">
         <thead>
@@ -27,12 +29,14 @@
                 <td>{{ $designation->designation_added_by }}</td>
                 <td>{{ $designation->designation_date_added }}</td>
                 <td>
-                    <a href="{{ route('designations.edit', $designation->id) }}" class="btn btn-sm btn-primary">Edit</a>
-                    <form action="{{ route('designations.destroy', $designation->id) }}" method="POST" style="display:inline-block;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this designation?')">Delete</button>
-                    </form>
+                    @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
+                        <a href="{{ route('designations.edit', $designation->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                        <form action="{{ route('designations.destroy', $designation->id) }}" method="POST" style="display:inline-block;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this designation?')">Delete</button>
+                        </form>
+                    @endif
                 </td>
             </tr>
             @endforeach
