@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Branch;
 
 class BranchController extends Controller
 {
@@ -11,7 +12,8 @@ class BranchController extends Controller
      */
     public function index()
     {
-        //
+        $branches = Branch::orderBy('branch_name')->paginate(20);
+        return view('branches.index', compact('branches'));
     }
 
     /**
@@ -20,6 +22,7 @@ class BranchController extends Controller
     public function create()
     {
         //
+         return view('branches.create');
     }
 
     /**
@@ -27,7 +30,17 @@ class BranchController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'branch_name' => 'required|unique:branches,branch_name',
+        ]);
+
+        Branch::create([
+            'branch_name' => strtoupper($request->branch_name),
+            'branch_added_by' => auth()->id(),
+            'branch_date_added' => now(),
+        ]);
+
+        return redirect()->route('branches.index')->with('status', 'Branch added successfully!');
     }
 
     /**
@@ -41,24 +54,34 @@ class BranchController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit($id)
     {
-        //
+        $branch = Branch::findOrFail($id);
+        return view('branches.edit', compact('branch'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $branch = Branch::findOrFail($id);
+        $request->validate([
+            'branch_name' => 'required|unique:branches,branch_name,' . $branch->id,
+        ]);
+        $branch->update([
+            'branch_name' => strtoupper($request->branch_name),
+        ]);
+        return redirect()->route('branches.index')->with('status', 'Branch updated successfully!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        $branch = Branch::findOrFail($id);
+        $branch->delete();
+        return redirect()->route('branches.index')->with('status', 'Branch deleted successfully!');
     }
 }
