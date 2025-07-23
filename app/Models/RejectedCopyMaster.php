@@ -14,4 +14,20 @@ class RejectedCopyMaster extends Model
         'rcm_type_id',
         'rcm_type',
     ];
+
+    public function addedBy()
+    {
+        return $this->belongsTo(User::class, 'rcm_added_by');
+    }
+
+    public function rejectedBy()
+    {
+        return $this->belongsTo(User::class, 'rcm_rejected_by');
+    }
+
+    // If rcm_type_id refers to a requisition
+    public function requisition()
+    {
+        return $this->belongsTo(Requisition::class, 'rcm_type_id');
+    }
 }

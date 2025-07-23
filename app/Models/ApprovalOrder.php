@@ -9,4 +9,9 @@ class ApprovalOrder extends Model
     protected $fillable = [
         'app_role_id',
     ];
+
+    public function userRole()
+    {
+        return $this->belongsTo(UserRole::class, 'app_role_id');
+    }
 }

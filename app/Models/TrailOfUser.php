@@ -13,4 +13,9 @@ class TrailOfUser extends Model
         'trail_page',
         'trail_browser',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'trail_user');
+    }
 }
