@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('user_role');
             $table->boolean('user_forgot_password')->default(0);
             $table->boolean('user_active')->default(1);
+            $table->boolean('user_online')->default(0);
+            $table->timestamp('user_last_logged_in')->nullable();
             $table->string('check_number')->unique();
             $table->timestamps();
         });
