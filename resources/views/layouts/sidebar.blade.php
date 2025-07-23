@@ -8,5 +8,7 @@
     <li class="nav-item mb-2"><a href="{{ route('approval-matrices.index') }}" class="nav-link">Approval Matrix</a></li>
     <li class="nav-item mb-2"><a href="{{ route('approval-groups.index') }}" class="nav-link">Approval Groups</a></li>
     <li class="nav-item mb-2"><a href="{{ route('delegations.index') }}" class="nav-link">Delegation</a></li>
-    <li class="nav-item mb-2"><a href="{{ route('users.edit', Auth::id()) }}" class="nav-link">Account Settings</a></li>
+    @if(Auth::check())
+        <li class="nav-item mb-2"><a href="{{ route('users.edit', Auth::id()) }}" class="nav-link">Account Settings</a></li>
+    @endif
 </ul> 

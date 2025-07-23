@@ -6,8 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\UserRole;
 use App\Mail\UserCredentialsMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -40,7 +43,8 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('users.create');
+        $roles = UserRole::orderBy('ur_name')->get();
+        return view('users.create', compact('roles'));
     }
 
     /**
@@ -115,7 +119,9 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $user = User::findOrFail($id);
+        $roles = UserRole::orderBy('ur_name')->get();
+        return view('users.edit', compact('user', 'roles'));
     }
 
     /**
@@ -197,5 +203,78 @@ class UserController extends Controller
         $user->save();
 
         return redirect('/dashboard')->with('status', 'Password changed successfully!');
+    }
+
+    // Show forgot password form
+    public function showForgotPasswordForm()
+    {
+        return view('auth.forgot-password');
+    }
+
+    // Handle email submission and send reset link
+    public function sendResetLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email|exists:users,user_email']);
+        $user = User::where('user_email', $request->email)->first();
+        $token = Str::random(64);
+        DB::table('password_resets')->updateOrInsert(
+            ['email' => $user->user_email],
+            [
+                'email' => $user->user_email,
+                'token' => $token,
+                'created_at' => now(),
+            ]
+        );
+        $resetLink = route('password.reset', ['token' => $token]);
+        // Send email with reset link
+        \Mail::raw("Click here to reset your username and password: $resetLink", function($message) use ($user) {
+            $message->to($user->user_email)
+                    ->subject('Reset Username and Password');
+        });
+        return back()->with('status', 'A reset link has been sent to your email.');
+    }
+
+    // Show reset form (from email link)
+    public function showResetForm($token)
+    {
+        $reset = DB::table('password_resets')->where('token', $token)->first();
+        if (!$reset) {
+            return redirect()->route('password.request')->withErrors(['token' => 'Invalid or expired token.']);
+        }
+        return view('auth.reset-password', ['token' => $token, 'email' => $reset->email]);
+    }
+
+    // Handle reset form submission
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email|exists:users,user_email',
+            'username' => 'required|string|unique:users,user_name',
+            'password' => [
+                'required',
+                'string',
+                'min:7',
+                'regex:/[A-Z]/', // Uppercase
+                'regex:/[a-z]/', // Lowercase
+                'regex:/[0-9]/', // Number
+                'regex:/[@?#$%\/]/', // Special character
+                'confirmed',
+            ],
+        ]);
+        $reset = DB::table('password_resets')->where([
+            ['token', $request->token],
+            ['email', $request->email],
+        ])->first();
+        if (!$reset) {
+            return redirect()->route('password.request')->withErrors(['token' => 'Invalid or expired token.']);
+        }
+        $user = User::where('user_email', $request->email)->first();
+        $user->user_name = $request->username;
+        $user->user_password = md5($request->password); // For legacy compatibility
+        $user->save();
+        // Delete the reset token
+        DB::table('password_resets')->where('email', $request->email)->delete();
+        return redirect()->route('login')->with('status', 'Your username and password have been updated. You can now log in.');
     }
 }

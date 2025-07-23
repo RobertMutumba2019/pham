@@ -104,7 +104,7 @@
                 </button>
             </form>
             <div class="mt-3 text-center">
-                <a href="#" class="text-muted">Forgot password?</a>
+                <a href="{{ route('password.request') }}" class="text-muted">Forgot password?</a>
             </div>
         </div>
     </div>

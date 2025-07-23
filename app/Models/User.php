@@ -67,6 +67,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(Requisition::class, 'req_added_by');
     }
+
+    public function role()
+    {
+        return $this->belongsTo(\App\Models\UserRole::class, 'user_role', 'id'); // Adjust 'id' if your PK is different
+    }
 }
 
 

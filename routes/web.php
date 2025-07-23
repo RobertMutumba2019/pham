@@ -54,3 +54,9 @@ Route::resource('comments', CommentController::class);
 Route::resource('rejected-copy-masters', RejectedCopyMasterController::class);
 Route::resource('trail-of-users', TrailOfUserController::class);
 Route::resource('approval-orders', ApprovalOrderController::class);
+
+// Forgot password and reset routes
+Route::get('forgot-password', [UserController::class, 'showForgotPasswordForm'])->name('password.request');
+Route::post('forgot-password', [UserController::class, 'sendResetLink'])->name('password.email');
+Route::get('reset-password/{token}', [UserController::class, 'showResetForm'])->name('password.reset');
+Route::post('reset-password', [UserController::class, 'resetPassword'])->name('password.update');

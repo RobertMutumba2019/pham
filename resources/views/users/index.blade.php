@@ -45,7 +45,7 @@
                 <td>{{ $user->user_name }}</td>
                 <td>{{ $user->user_email }}</td>
                 <td>{{ $user->user_active ? 'Active' : 'Locked' }}</td>
-                <td>{{ $user->user_role }}</td>
+                <td>{{ $user->role ? $user->role->ur_name : '' }}</td>
                 <td>
                     <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
                         @csrf

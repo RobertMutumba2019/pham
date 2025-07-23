@@ -44,7 +44,12 @@
             </div>
             <div class="col-md-4">
                 <label for="user_role" class="form-label">User Role</label>
-                <input type="number" class="form-control" id="user_role" name="user_role" value="{{ old('user_role') }}" required>
+                <select class="form-control" id="user_role" name="user_role" required>
+                    <option value="">--Select--</option>
+                    @foreach($roles as $role)
+                        <option value="{{ $role->id }}" {{ old('user_role') == $role->id ? 'selected' : '' }}>{{ $role->ur_name }}</option>
+                    @endforeach
+                </select>
             </div>
         </div>
         <div class="mt-4">
