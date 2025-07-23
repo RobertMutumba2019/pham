@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Edit User')
+@section('title', 'Account Settings')
 
 @section('content')
 <div class="container">
-    <h2>Edit User</h2>
+    <h2>Account Settings</h2>
     @if ($errors->any())
         <div class="alert alert-danger">
             <ul class="mb-0">
@@ -44,7 +44,7 @@
             </div>
             <div class="col-md-4">
                 <label for="user_role" class="form-label">User Role</label>
-                <select class="form-control" id="user_role" name="user_role" required>
+                <select class="form-control" id="user_role" name="user_role" required disabled>
                     <option value="">--Select--</option>
                     @foreach($roles as $role)
                         <option value="{{ $role->id }}" {{ old('user_role', $user->user_role) == $role->id ? 'selected' : '' }}>{{ $role->ur_name }}</option>
@@ -53,7 +53,7 @@
             </div>
         </div>
         <div class="mt-4">
-            <button type="submit" class="btn btn-primary">Update User</button>
+            <button type="submit" class="btn btn-primary">Update Account</button>
             <a href="{{ route('users.index') }}" class="btn btn-secondary">Cancel</a>
         </div>
     </form>

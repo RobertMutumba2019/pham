@@ -11,7 +11,8 @@ class ApprovalMatrixController extends Controller
      */
     public function index()
     {
-        //
+        $matrices = \App\Models\ApprovalMatrix::all();
+        return view('approval_matrices.index', compact('matrices'));
     }
 
     /**

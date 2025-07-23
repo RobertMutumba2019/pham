@@ -11,7 +11,8 @@ class ApprovalGroupController extends Controller
      */
     public function index()
     {
-        //
+        $groups = \App\Models\ApprovalGroup::all();
+        return view('approval_groups.index', compact('groups'));
     }
 
     /**

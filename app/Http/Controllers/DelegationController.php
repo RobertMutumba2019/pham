@@ -11,7 +11,8 @@ class DelegationController extends Controller
      */
     public function index()
     {
-        //
+        $delegations = \App\Models\Delegation::all();
+        return view('delegations.index', compact('delegations'));
     }
 
     /**
