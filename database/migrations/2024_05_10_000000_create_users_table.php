@@ -24,7 +24,7 @@ return new class extends Migration
             $table->boolean('user_active')->default(1);
             $table->boolean('user_online')->default(0);
             $table->timestamp('user_last_logged_in')->nullable();
-            $table->string('check_number')->unique();
+            $table->string('check_number')->nullable();
             $table->timestamps();
         });
     }

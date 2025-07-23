@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Mail\UserCredentialsMail;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -47,7 +49,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'check_number' => 'required|unique:users,check_number',
+            
             'user_surname' => 'required|string',
             'user_othername' => 'required|string',
             'user_email' => 'required|email|unique:users,user_email',
@@ -55,15 +57,26 @@ class UserController extends Controller
             'user_role' => 'required|integer',
         ]);
 
-        $username = $request->check_number;
-
-        // Check for duplicate username
-        if (User::where('user_name', $username)->exists()) {
-            return back()->withErrors(['user_name' => "Username $username already exists"])->withInput();
+        // Generate username: first letter of first name + first letter of surname + unique 3-digit number
+        $firstLetterFirstName = strtoupper(substr($request->user_othername, 0, 1));
+        $firstLetterSurname = strtoupper(substr($request->user_surname, 0, 1));
+        
+        // Find a unique 3-digit number
+        $baseUsername = $firstLetterFirstName . $firstLetterSurname;
+        $username = null;
+        for ($i = 1; $i <= 999; $i++) {
+            $candidate = $baseUsername . str_pad($i, 3, '0', STR_PAD_LEFT);
+            if (!User::where('user_name', $candidate)->exists()) {
+                $username = $candidate;
+                break;
+            }
+        }
+        if (!$username) {
+            return back()->withErrors(['user_name' => 'Could not generate a unique username.'])->withInput();
         }
 
-        // Generate password (default or random)
-        $password = 'password'; // Or use Str::random(8) for random
+        // Generate random password
+        $password = \Illuminate\Support\Str::random(8);
         $hashedPassword = md5($password); // For legacy compatibility
 
         $user = User::create([
@@ -80,12 +93,13 @@ class UserController extends Controller
             'user_role' => $request->user_role,
             'user_forgot_password' => 1,
             'user_active' => 1,
-            'check_number' => $request->check_number,
+            
         ]);
 
-        // (Optional) Send email notification to the user
+        // Send email notification to the user with username and password
+        Mail::to($user->user_email)->send(new UserCredentialsMail($username, $password));
 
-        return redirect()->route('users.index')->with('status', 'User created successfully!');
+        return redirect()->route('users.index')->with('status', 'User created successfully! Username: ' . $username . ' Password: ' . $password);
     }
 
     /**
@@ -117,7 +131,9 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $user = User::findOrFail($id);
+        $user->delete();
+        return redirect()->route('users.index')->with('status', 'User deleted successfully!');
     }
 
     public function showLoginForm()

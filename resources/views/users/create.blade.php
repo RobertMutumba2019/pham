@@ -17,10 +17,7 @@
     <form method="POST" action="{{ route('users.store') }}">
         @csrf
         <div class="row g-3">
-            <div class="col-md-4">
-                <label for="check_number" class="form-label">PF Number</label>
-                <input type="text" class="form-control" id="check_number" name="check_number" value="{{ old('check_number') }}" required>
-            </div>
+            
             <div class="col-md-4">
                 <label for="user_surname" class="form-label">Surname</label>
                 <input type="text" class="form-control" id="user_surname" name="user_surname" value="{{ old('user_surname') }}" required>
