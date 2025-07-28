@@ -27,7 +27,33 @@ class RequisitionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Validate input
+        $validated = $request->validate([
+            'req_title' => 'required|string|max:255',
+            'req_division' => 'required|string|max:255',
+            'items' => 'required|array|min:1',
+            'items.*.ri_code' => 'required|string|max:255',
+            'items.*.ri_quantity' => 'required|numeric|min:1',
+            'items.*.ri_uom' => 'required|string|max:255',
+            'items.*.ri_description' => 'required|string|max:255',
+            'action' => 'required|in:draft,forward',
+        ]);
+
+        $user = $request->user();
+        // Check if user is an approver (cannot create requisition)
+        if ($user->role && $user->role->is_approver) {
+            return response()->json(['error' => 'You cannot create any requisition because you are an Approver'], 403);
+        }
+
+        // Delegate to service
+        $service = app(\App\Services\RequisitionService::class);
+        $result = $service->createRequisition($user, $validated);
+
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], 422);
+        }
+
+        return response()->json(['message' => 'Requisition created successfully', 'requisition' => $result['requisition']], 201);
     }
 
     /**

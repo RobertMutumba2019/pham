@@ -101,7 +101,7 @@
                 <!-- Sample sidebar content (replace with @include('layouts.sidebar')) -->
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a href="#" class="nav-link active" aria-current="page">
+                        <a href="/dashboard" class="nav-link active" aria-current="page">
                             <i class="fas fa-home me-2"></i> Dashboard
                         </a>
                     </li>
@@ -117,6 +117,10 @@
                     </li>
                     <li class="nav-item">
                         @if(Auth::check())
+                   
+        <li class="nav-item mb-2"><a href="{{ route('users.edit', Auth::id()) }}" class="nav-link">Account Settings</a></li>
+        <li class="nav-item mb-2"><a href="{{ route('users.change-password.form') }}" class="nav-link">Update Username & Password</a></li>
+        <li class="nav-item mb-2">
         <li class="nav-item mb-2"><a href="{{ route('users.edit', Auth::id()) }}" class="nav-link">Account Settings</a></li>
         <li class="nav-item mb-2">
             <form action="{{ route('logout') }}" method="POST" style="display:inline;">

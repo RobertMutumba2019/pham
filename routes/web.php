@@ -23,6 +23,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\RejectedCopyMasterController;
 use App\Http\Controllers\TrailOfUserController;
 use App\Http\Controllers\ApprovalOrderController;
+use App\Http\Controllers\ReportController;
 
 
 Route::get('/', [UserController::class, 'showLoginForm'])->name('login');
@@ -56,8 +57,17 @@ Route::resource('rejected-copy-masters', RejectedCopyMasterController::class);
 Route::resource('trail-of-users', TrailOfUserController::class);
 Route::resource('approval-orders', ApprovalOrderController::class);
 
+// Report routes
+Route::get('/reports/serial-number-finder', [ReportController::class, 'serialNumberFinder'])->name('reports.serial_number_finder');
+Route::get('/reports/summary-list', [ReportController::class, 'summaryList'])->name('reports.summary_list');
+Route::get('/reports/territory-vehicle-request-and-return', [ReportController::class, 'territoryVehicleRequestAndReturn'])->name('reports.territory_vehicle_request_and_return');
+Route::get('/reports/export-users', [ReportController::class, 'exportUsers'])->name('reports.export_users');
+
 // Forgot password and reset routes
 Route::get('forgot-password', [UserController::class, 'showForgotPasswordForm'])->name('password.request');
 Route::post('forgot-password', [UserController::class, 'sendResetLink'])->name('password.email');
 Route::get('reset-password/{token}', [UserController::class, 'showResetForm'])->name('password.reset');
 Route::post('reset-password', [UserController::class, 'resetPassword'])->name('password.update');
+
+Route::get('/change-password', [UserController::class, 'showChangePasswordForm'])->name('users.change-password.form');
+Route::post('/change-password', [UserController::class, 'changePassword'])->name('users.change-password.update');

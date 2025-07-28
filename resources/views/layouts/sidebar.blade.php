@@ -10,7 +10,7 @@
     <li class="nav-item mb-2"><a href="{{ route('delegations.index') }}" class="nav-link">Delegation</a></li>
     @if(Auth::check())
         <div style="color: red; font-weight: bold;">Debug: Role = {{ auth()->user()->role->ur_name ?? 'none' }}</div>
-        <li class="nav-item mb-2"><a href="{{ route('users.edit', Auth::id()) }}" class="nav-link">Account Settings</a></li>
+    <li class="nav-item mb-2"><a href="{{ route('users.edit', Auth::id()) }}" class="nav-link">Account Settings</a></li>
         <li class="nav-item mb-2"><a href="{{ route('users.change-password.form') }}" class="nav-link">Update Username & Password</a></li>
         <li class="nav-item mb-2">
             <form action="{{ route('logout') }}" method="POST" style="display:inline;">

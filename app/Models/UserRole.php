@@ -16,4 +16,10 @@ class UserRole extends Model
     {
         return $this->hasMany(AccessRight::class, 'ar_role_id');
     }
+
+    public function getIsApproverAttribute()
+    {
+        // Adjust this logic based on your actual schema
+        return $this->role_type === 'approver' || $this->is_approver == 1;
+    }
 }

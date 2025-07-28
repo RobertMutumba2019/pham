@@ -200,6 +200,7 @@ class UserController extends Controller
     public function changePassword(Request $request)
     {
         $request->validate([
+            'username' => 'required|string|unique:users,user_name,' . auth()->id(),
             'password' => [
                 'required',
                 'string',
@@ -213,11 +214,11 @@ class UserController extends Controller
         ]);
 
         $user = Auth::user();
+        $user->user_name = $request->username;
         $user->user_password = md5($request->password); // For legacy compatibility
-        // $user->user_password = Hash::make($request->password); // Recommended for new systems
         $user->save();
 
-        return redirect('/dashboard')->with('status', 'Password changed successfully!');
+        return redirect('/dashboard')->with('status', 'Username and password changed successfully!');
     }
 
     // Show forgot password form

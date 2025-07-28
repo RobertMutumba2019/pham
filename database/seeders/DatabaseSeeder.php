@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -15,9 +14,18 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::updateOrCreate(
+            ['user_name' => 'testuser'],
+            [
+                'user_surname' => 'User',
+                'user_othername' => 'Test',
+                'user_email' => 'test@example.com',
+                'user_password' => bcrypt('password'),
+                'user_role' => 1,
+                'user_active' => 1,
+                'check_number' => '123456',
+                // add other required fields as needed
+            ]
+        );
     }
 }
