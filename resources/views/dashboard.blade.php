@@ -46,8 +46,14 @@
             <a href="{{ route('reports.export_users') }}" class="card card-body text-center shadow-sm bg-success text-white">Export Users (Excel)</a>
         </div>
         <div class="col-md-4">
+            <a href="{{ route('reports.serial_number_finder') }}" class="card card-body text-center shadow-sm bg-info text-white">Serial Number Finder Report</a>
+        </div>
+
+
+        
+        <div class="col-md-4">
             <a href="{{ route('users.edit', Auth::id()) }}" class="card card-body text-center shadow-sm">Account Settings</a>
         </div>
     </div>
 </div>
-@endsection 
+@endsection
