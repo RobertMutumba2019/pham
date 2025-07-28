@@ -42,9 +42,23 @@ class ReportController extends Controller
     // Territory Vehicle Request & Return Report
     public function territoryVehicleRequestAndReturn(Request $request)
     {
-        // Placeholder: implement actual logic based on your schema
-        $vehicleRequests = DB::table('vehicle_requests')->paginate(20);
-        $vehicleReturns = DB::table('vehicle_returns')->paginate(20);
+        // Get vehicle requests with user information
+        $vehicleRequests = DB::table('vehicle_requests')
+            ->leftJoin('users', 'vehicle_requests.requested_by', '=', 'users.id')
+            ->select('vehicle_requests.*', 'users.user_name', 'users.user_surname')
+            ->paginate(20);
+            
+        // Get vehicle returns with user information
+        $vehicleReturns = DB::table('vehicle_returns')
+            ->leftJoin('users as returned_by_user', 'vehicle_returns.returned_by', '=', 'returned_by_user.id')
+            ->leftJoin('users as received_by_user', 'vehicle_returns.received_by', '=', 'received_by_user.id')
+            ->select('vehicle_returns.*', 
+                    'returned_by_user.user_name as returned_by_name', 
+                    'returned_by_user.user_surname as returned_by_surname',
+                    'received_by_user.user_name as received_by_name', 
+                    'received_by_user.user_surname as received_by_surname')
+            ->paginate(20);
+            
         return view('reports.territory_vehicle_request_and_return', compact('vehicleRequests', 'vehicleReturns'));
     }
 
