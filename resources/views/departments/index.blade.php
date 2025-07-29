@@ -9,7 +9,7 @@
         <div class="alert alert-success">{{ session('status') }}</div>
     @endif
     <div class="mb-3">
-        @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
+        @if(auth()->check() && auth()->user()->role && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
             <a href="{{ route('departments.create') }}" class="btn btn-success">Add Department</a>
         @endif
     </div>
@@ -29,7 +29,7 @@
                 <td>{{ $department->dept_added_by }}</td>
                 <td>{{ $department->dept_date_added }}</td>
                 <td>
-                    @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
+                    @if(auth()->check() && auth()->user()->role && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
                         <a href="{{ route('departments.edit', $department->id) }}" class="btn btn-sm btn-primary">Edit</a>
                         <form action="{{ route('departments.destroy', $department->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Are you sure you want to delete this department?');">
                             @csrf

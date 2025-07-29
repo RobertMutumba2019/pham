@@ -9,7 +9,7 @@
         <div class="alert alert-success">{{ session('status') }}</div>
     @endif
     <div class="mb-3">
-        @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
+        @if(auth()->check() && auth()->user()->role && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
             <a href="{{ route('user-roles.create') }}" class="btn btn-success">Add Role</a>
         @endif
     </div>
@@ -29,7 +29,7 @@
                 <td>{{ $role->ur_added_by }}</td>
                 <td>{{ $role->ur_date_added }}</td>
                 <td>
-                    @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
+                    @if(auth()->check() && auth()->user()->role && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
                         <a href="{{ route('user-roles.edit', $role->id) }}" class="btn btn-sm btn-primary">Edit</a>
                         <form action="{{ route('user-roles.destroy', $role->id) }}" method="POST" style="display:inline-block;">
                             @csrf

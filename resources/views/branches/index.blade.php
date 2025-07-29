@@ -9,7 +9,7 @@
         <div class="alert alert-success">{{ session('status') }}</div>
     @endif
     <div class="mb-3">
-        @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
+        @if(auth()->check() && auth()->user()->role && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
             <a href="{{ route('branches.create') }}" class="btn btn-success">Add Branch</a>
         @endif
     </div>
@@ -29,7 +29,7 @@
                 <td>{{ $branch->branch_added_by }}</td>
                 <td>{{ $branch->branch_date_added }}</td>
                 <td>
-                    @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
+                    @if(auth()->check() && auth()->user()->role && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
                         <a href="{{ route('branches.edit', $branch->id) }}" class="btn btn-sm btn-primary">Edit</a>
                         <form action="{{ route('branches.destroy', $branch->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Are you sure you want to delete this branch?');">
                             @csrf
