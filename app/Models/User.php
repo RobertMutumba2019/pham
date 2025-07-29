@@ -54,6 +54,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'user_role' => 'integer',
         ];
     }
 
@@ -70,7 +71,7 @@ class User extends Authenticatable
 
     public function role()
     {
-        return $this->belongsTo(\App\Models\UserRole::class, 'user_role', 'id'); // Adjust 'id' if your PK is different
+        return $this->belongsTo(\App\Models\UserRole::class, 'user_role', 'id');
     }
 
     public function hasRight($page, $action)
@@ -84,6 +85,14 @@ class User extends Authenticatable
             return $access[$rightColumn] == 1;
         }
         return false;
+    }
+
+    /**
+     * Check if user has admin privileges
+     */
+    public function isAdmin()
+    {
+        return $this->role && in_array(strtolower($this->role->ur_name), ['admin', 'administrator', 'supervisor']);
     }
 }
 

@@ -6,7 +6,7 @@
 <div class="container">
     <h2>System Users</h2>
     <div class="mb-3">
-        @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
+        @if(auth()->check() && auth()->user()->role && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
             <a href="{{ route('users.create') }}" class="btn btn-success">Add User</a>
         @endif
     </div>
@@ -49,7 +49,7 @@
                 <td>{{ $user->user_active ? 'Active' : 'Locked' }}</td>
                 <td>{{ $user->role ? $user->role->ur_name : '' }}</td>
                 <td>
-                    @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
+                    @if(auth()->check() && auth()->user()->role && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
                         <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary btn-sm">Edit</a>
                         <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
                             @csrf
