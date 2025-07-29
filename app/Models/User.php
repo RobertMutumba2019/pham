@@ -89,20 +89,19 @@ class User extends Authenticatable
 
 
 // PS C:\xampp\htdocs\stor\laravel12app> php artisan tinker
-// Psy Shell v0.12.9 (PHP 8.2.12 — cli) by Justin Hileman
-// > App\Models\User::create([
-// .     'user_name' => 'admin',
-// .     'user_surname' => 'Admin',
-// .     'user_othername' => 'User',
-// .     'user_status' => 1,
-// .     'user_email' => 'admin@example.com',
-// .     'user_telephone' => '0000000000',
-// .     'user_gender' => 'M',
-// .     'user_password' => md5('Admin@2025'),
-// .     'user_date_added' => now(),
-// .     'user_added_by' => 1,
-// .     'user_role' => 1,
-// .     'user_forgot_password' => 0,
-// .     'user_active' => 1,
-// .     'check_number' => 'ADMIN001'
-// . ]);
+// App\Models\User::create([
+//     'user_name' => 'admin',
+//     'user_surname' => 'Admin',
+//     'user_othername' => 'User',
+//     'user_status' => 1,
+//     'user_email' => 'admin@example.com',
+//     'user_telephone' => '0000000000',
+//     'user_gender' => 'M',
+//     'user_password' => md5('Admin@2025'),
+//     'user_date_added' => now(),
+//     'user_added_by' => 1,
+//     'user_role' => 1,
+//     'user_forgot_password' => 0,
+//     'user_active' => 1,
+//     'check_number' => 'ADMIN001'
+// ]);

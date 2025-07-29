@@ -24,6 +24,8 @@ use App\Http\Controllers\RejectedCopyMasterController;
 use App\Http\Controllers\TrailOfUserController;
 use App\Http\Controllers\ApprovalOrderController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RequisitionApprovalController;
+use App\Http\Controllers\ApprovalWorkflowController;
 
 
 Route::get('/', [UserController::class, 'showLoginForm'])->name('login');
@@ -62,6 +64,24 @@ Route::get('/reports/summary-list', [ReportController::class, 'summaryList'])->n
 Route::get('/reports/territory-vehicle-request-and-return', [ReportController::class, 'territoryVehicleRequestAndReturn'])->name('reports.territory_vehicle_request_and_return');
 Route::get('/reports/export-users', [ReportController::class, 'exportUsers'])->name('reports.export_users');
 Route::resource('approval-orders', ApprovalOrderController::class);
+
+// Requisition Approval Workflow Routes
+Route::resource('requisition-approvals', RequisitionApprovalController::class);
+Route::post('requisition-approvals/{requisitionApproval}/approve', [RequisitionApprovalController::class, 'approve'])->name('requisition-approvals.approve');
+Route::post('requisition-approvals/{requisitionApproval}/reject', [RequisitionApprovalController::class, 'reject'])->name('requisition-approvals.reject');
+Route::post('requisition-approvals/{requisitionApproval}/delegate', [RequisitionApprovalController::class, 'delegate'])->name('requisition-approvals.delegate');
+Route::get('requisitions/{requisition}/approval-history', [RequisitionApprovalController::class, 'history'])->name('requisitions.approval-history');
+
+// Approval Workflow Management Routes
+Route::resource('approval-workflows', ApprovalWorkflowController::class);
+Route::post('approval-workflows/{approvalWorkflow}/toggle-status', [ApprovalWorkflowController::class, 'toggleStatus'])->name('approval-workflows.toggle-status');
+Route::get('approval-workflows/users-for-delegation', [ApprovalWorkflowController::class, 'getUsersForDelegation'])->name('approval-workflows.users-for-delegation');
+
+// File Management Routes
+Route::get('attachments/{attachment}/download', [AttachmentController::class, 'download'])->name('attachments.download');
+Route::get('attachments/{attachment}/preview', [AttachmentController::class, 'preview'])->name('attachments.preview');
+Route::get('attachments/get-attachments', [AttachmentController::class, 'getAttachments'])->name('attachments.get-attachments');
+Route::post('attachments/bulk-upload', [AttachmentController::class, 'bulkUpload'])->name('attachments.bulk-upload');
 
 // Forgot password and reset routes
 Route::get('forgot-password', [UserController::class, 'showForgotPasswordForm'])->name('password.request');
