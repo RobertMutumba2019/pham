@@ -36,6 +36,12 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware('auth')->name('dashboard');
 
+// Pending Approvals Route
+Route::get('/pending-approvals', [RequisitionApprovalController::class, 'pending'])->middleware('auth')->name('approvals.pending');
+
+// Workflows Route (alias for approval-workflows)
+Route::get('/workflows', [ApprovalWorkflowController::class, 'index'])->middleware('auth')->name('workflows.index');
+
 Route::resource('users', UserController::class);
 Route::resource('departments', DepartmentController::class);
 Route::resource('requisitions', RequisitionController::class);
@@ -75,7 +81,7 @@ Route::post('requisition-approvals/{requisitionApproval}/delegate', [Requisition
 Route::get('requisitions/{requisition}/approval-history', [RequisitionApprovalController::class, 'history'])->name('requisitions.approval-history');
 
 // Approval Workflow Management Routes
-Route::resource('approval-workflows', ApprovalWorkflowController::class);
+Route::resource('approval-workflows', ApprovalWorkflowController::class)->middleware('auth');
 Route::post('approval-workflows/{approvalWorkflow}/toggle-status', [ApprovalWorkflowController::class, 'toggleStatus'])->name('approval-workflows.toggle-status');
 Route::get('approval-workflows/users-for-delegation', [ApprovalWorkflowController::class, 'getUsersForDelegation'])->name('approval-workflows.users-for-delegation');
 

@@ -88,13 +88,25 @@
                 <img src="/images/centenary.png" alt="Centenary Stores Logo" class="logo">
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a href="/dashboard" class="nav-link active"><i class="fas fa-home me-2"></i> Dashboard</a>
+                        <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home me-2"></i> Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link"><i class="fas fa-box me-2"></i> Requisitions</a>
+                        <a href="{{ route('requisitions.index') }}" class="nav-link {{ request()->routeIs('requisitions.*') ? 'active' : '' }}"><i class="fas fa-box me-2"></i> Requisitions</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('users.index') }}" class="nav-link"><i class="fas fa-users me-2"></i> Users</a>
+                        <a href="{{ route('approvals.pending') }}" class="nav-link {{ request()->routeIs('approvals.*') ? 'active' : '' }}"><i class="fas fa-clock me-2"></i> Pending Approvals</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}"><i class="fas fa-users me-2"></i> Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('attachments.index') }}" class="nav-link {{ request()->routeIs('attachments.*') ? 'active' : '' }}"><i class="fas fa-file me-2"></i> File Management</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('workflows.index') }}" class="nav-link {{ request()->routeIs('workflows.*') || request()->routeIs('approval-workflows.*') ? 'active' : '' }}"><i class="fas fa-sitemap me-2"></i> Workflows</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('reports.dashboard') }}" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="fas fa-chart-bar me-2"></i> Reports</a>
                     </li>
                     @if(Auth::check())
                     <li class="nav-item">

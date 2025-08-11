@@ -30,6 +30,29 @@ class RequisitionApprovalController extends Controller
     }
 
     /**
+     * Display pending approvals page (for the blade template)
+     */
+    public function pending(Request $request)
+    {
+        $user_id = Auth::id();
+        
+        // Get pending approvals for current user
+        $pendingApprovals = RequisitionApproval::with([
+            'requisition.user.department',
+            'requisition.status'
+        ])
+        ->where('approver_id', $user_id)
+        ->where('status', 'pending')
+        ->orderBy('created_at', 'desc')
+        ->paginate(20);
+        
+        // Get users for delegation dropdown
+        $users = \App\Models\User::with('department')->where('id', '!=', $user_id)->get();
+        
+        return view('approvals.pending', compact('pendingApprovals', 'users'));
+    }
+
+    /**
      * Show the form for creating a new approval
      */
     public function create()

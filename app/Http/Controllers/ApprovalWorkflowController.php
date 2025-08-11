@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\ApprovalWorkflow;
 use App\Models\User;
 use App\Models\UserRole;
+use App\Models\Department;
+use App\Models\RequisitionApproval;
 use Illuminate\Support\Facades\Auth;
 
 class ApprovalWorkflowController extends Controller
@@ -15,11 +17,25 @@ class ApprovalWorkflowController extends Controller
      */
     public function index()
     {
-        $workflows = ApprovalWorkflow::with('creator')
+        $workflows = ApprovalWorkflow::with(['creator', 'department'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
+            
+        // Statistics for the workflow dashboard
+        $totalWorkflows = ApprovalWorkflow::count();
+        $activeWorkflows = ApprovalWorkflow::where('is_active', true)->count();
+        $pendingApprovals = RequisitionApproval::where('status', 'pending')->count();
+        $totalDepartments = Department::count();
+        $departments = Department::all();
         
-        return view('approval-workflows.index', compact('workflows'));
+        return view('workflows.index', compact(
+            'workflows', 
+            'totalWorkflows', 
+            'activeWorkflows', 
+            'pendingApprovals', 
+            'totalDepartments',
+            'departments'
+        ));
     }
 
     /**
