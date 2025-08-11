@@ -59,9 +59,11 @@ Route::resource('rejected-copy-masters', RejectedCopyMasterController::class);
 Route::resource('trail-of-users', TrailOfUserController::class);
 
 // Report routes
+Route::get('/reports/dashboard', [ReportController::class, 'dashboard'])->name('reports.dashboard');
 Route::get('/reports/serial-number-finder', [ReportController::class, 'serialNumberFinder'])->name('reports.serial_number_finder');
 Route::get('/reports/summary-list', [ReportController::class, 'summaryList'])->name('reports.summary_list');
 Route::get('/reports/territory-vehicle-request-and-return', [ReportController::class, 'territoryVehicleRequestAndReturn'])->name('reports.territory_vehicle_request_and_return');
+Route::get('/reports/department-report', [ReportController::class, 'departmentReport'])->name('reports.department_report');
 Route::get('/reports/export-users', [ReportController::class, 'exportUsers'])->name('reports.export_users');
 Route::resource('approval-orders', ApprovalOrderController::class);
 

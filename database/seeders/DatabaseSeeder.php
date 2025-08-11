@@ -26,14 +26,6 @@ class DatabaseSeeder extends Seeder
                 'check_number' => '123456',
                 // add other required fields as needed
             ]
-        );
-                'user_email' => 'test@example.com',
-                'user_password' => bcrypt('password'),
-                'user_role' => 1,
-                'user_active' => 1,
-                'check_number' => '123456',
-                // add other required fields as needed
-            ]
-        );
+            );
     }
 }
