@@ -29,6 +29,11 @@ class ApprovalWorkflow extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+
     public function requisitionApprovals()
     {
         return $this->hasMany(RequisitionApproval::class, 'workflow_id');
