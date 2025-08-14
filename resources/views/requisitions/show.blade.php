@@ -10,7 +10,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="mb-0"><i class="fa fa-eye"></i> Requisition Details</h4>
                     <div>
-                        <a href="{{ route('requisitions.edit', $requisition->req_id ?? 0) }}" class="btn btn-warning">
+                        <a href="{{ route('requisitions.edit', $requisition->id ?? 0) }}" class="btn btn-warning">
                             <i class="fa fa-edit"></i> Edit
                         </a>
                         <a href="{{ route('requisitions.index') }}" class="btn btn-secondary">

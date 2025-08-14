@@ -46,45 +46,32 @@ class RequisitionController extends Controller
             'request_data' => $request->all()
         ]);
         
-        // Validate input - updated to match form field names
-        $validated = $request->validate([
-            'req_title' => 'required|string|max:255',
-            'req_description' => 'required|string',
-            'req_priority' => 'required|in:Normal,High,Urgent',
-            'req_division' => 'required|string|max:255',
-            'req_ref' => 'nullable|string|max:255',
-            'req_date_needed' => 'nullable|date',
-            'req_justification' => 'nullable|string',
-            'items' => 'required|array|min:1',
-            'items.*.description' => 'required|string|max:255',
-            'items.*.quantity' => 'required|numeric|min:1',
-            'items.*.unit' => 'nullable|string|max:50',
-            'items.*.estimated_cost' => 'nullable|numeric|min:0',
-            'action' => 'required|in:draft,submit',
-            'attachments.*' => 'nullable|file|max:10240', // 10MB max per file
-        ]);
-
-        $user = $request->user();
-        // Check if user is an approver (cannot create requisition)
-        if ($user->role && $user->role->is_approver) {
-            return back()->withErrors(['error' => 'You cannot create any requisition because you are an Approver']);
-        }
-
-        DB::beginTransaction();
         try {
-            \Log::info('Starting requisition creation process');
+            // Validate input - simplified validation
+            $validated = $request->validate([
+                'req_title' => 'required|string|max:255',
+                'req_description' => 'required|string',
+                'req_priority' => 'required|in:Normal,High,Urgent',
+                'req_division' => 'required|string|max:255',
+                'req_ref' => 'nullable|string|max:255',
+                'req_date_needed' => 'nullable|date',
+                'req_justification' => 'nullable|string',
+                'items' => 'required|array|min:1',
+                'items.*.description' => 'required|string|max:255',
+                'items.*.quantity' => 'required|numeric|min:1',
+                'items.*.unit' => 'nullable|string|max:50',
+                'items.*.estimated_cost' => 'nullable|numeric|min:0',
+                'action' => 'required|in:draft,submit',
+            ]);
+
+            \Log::info('Validation passed, starting requisition creation');
+
+            $user = $request->user();
             
-            // Create requisition
+            // Create requisition - simplified approach
             $ref = $user->id . time();
             $status = $validated['action'] === 'draft' ? -1 : 1;
             $requisitionNumber = $validated['action'] === 'submit' ? $this->generateRequisitionNumber() : null;
-
-            \Log::info('Creating requisition with data', [
-                'req_number' => $requisitionNumber,
-                'req_title' => $validated['req_title'],
-                'req_division' => $validated['req_division'],
-                'status' => $status
-            ]);
 
             $requisition = Requisition::create([
                 'req_number' => $requisitionNumber,
@@ -102,39 +89,18 @@ class RequisitionController extends Controller
 
             \Log::info('Requisition created successfully', ['requisition_id' => $requisition->id]);
 
-            // Create requisition items
-            foreach ($validated['items'] as $index => $itemData) {
-                \Log::info('Creating item', ['index' => $index, 'item_data' => $itemData]);
-                
-                $item = $requisition->items()->create([
+            // Create requisition items - simplified
+            foreach ($validated['items'] as $itemData) {
+                RequisitionItem::create([
+                    'requisition_id' => $requisition->id,
                     'item_description' => $itemData['description'],
-                    'item_quantity' => $itemData['quantity'],
+                    'item_quantity' => (int)$itemData['quantity'],
                     'item_unit' => $itemData['unit'] ?? null,
-                    'item_estimated_cost' => $itemData['estimated_cost'] ?? null,
+                    'item_estimated_cost' => !empty($itemData['estimated_cost']) ? (float)$itemData['estimated_cost'] : null,
                 ]);
-                
-                \Log::info('Item created successfully', ['item_id' => $item->id]);
             }
 
-            // Handle file attachments
-            if ($request->hasFile('attachments')) {
-                \Log::info('Processing attachments', ['count' => count($request->file('attachments'))]);
-                
-                foreach ($request->file('attachments') as $file) {
-                    $path = $file->store('attachments', 'public');
-                    $attachment = $requisition->attachments()->create([
-                        'file_path' => $path,
-                        'original_name' => $file->getClientOriginalName(),
-                        'file_size' => $file->getSize(),
-                        'mime_type' => $file->getMimeType(),
-                    ]);
-                    
-                    \Log::info('Attachment created', ['attachment_id' => $attachment->id]);
-                }
-            }
-
-            DB::commit();
-            \Log::info('Transaction committed successfully');
+            \Log::info('Items created successfully');
 
             $message = $validated['action'] === 'draft' 
                 ? 'Requisition saved as draft successfully!' 
@@ -146,12 +112,10 @@ class RequisitionController extends Controller
                 ->with('success', $message);
 
         } catch (\Exception $e) {
-            DB::rollBack();
             \Log::error('Failed to create requisition', [
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+                'line' => $e->getLine()
             ]);
             return back()->withInput()->withErrors(['error' => 'Failed to create requisition: ' . $e->getMessage()]);
         }

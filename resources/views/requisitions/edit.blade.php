@@ -11,7 +11,7 @@
                     <h4 class="mb-0"><i class="fa fa-edit"></i> Edit Requisition</h4>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('requisitions.update', $requisition->req_id ?? 0) }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('requisitions.update', $requisition->id ?? 0) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         
@@ -195,7 +195,7 @@
                         </div>
 
                         <div class="d-flex justify-content-between">
-                            <a href="{{ route('requisitions.show', $requisition->req_id ?? 0) }}" class="btn btn-secondary">
+                            <a href="{{ route('requisitions.show', $requisition->id ?? 0) }}" class="btn btn-secondary">
                                 <i class="fa fa-arrow-left"></i> Back to View
                             </a>
                             <div>

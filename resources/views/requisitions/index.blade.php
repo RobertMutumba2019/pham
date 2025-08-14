@@ -76,10 +76,10 @@
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="{{ route('requisitions.show', $requisition->req_id ?? 0) }}" class="btn btn-sm btn-info">
+                                            <a href="{{ route('requisitions.show', $requisition->id ?? 0) }}" class="btn btn-sm btn-info">
                                                 <i class="fa fa-eye"></i> View
                                             </a>
-                                            <a href="{{ route('requisitions.edit', $requisition->req_id ?? 0) }}" class="btn btn-sm btn-warning">
+                                            <a href="{{ route('requisitions.edit', $requisition->id ?? 0) }}" class="btn btn-sm btn-warning">
                                                 <i class="fa fa-edit"></i> Edit
                                             </a>
                                         </div>
