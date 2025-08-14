@@ -44,6 +44,16 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
+                                    <label for="req_division" class="form-label">Division *</label>
+                                    <input type="text" class="form-control @error('req_division') is-invalid @enderror" 
+                                           id="req_division" name="req_division" value="{{ old('req_division') }}" required>
+                                    @error('req_division')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
                                     <label for="req_ref" class="form-label">Reference</label>
                                     <input type="text" class="form-control @error('req_ref') is-invalid @enderror" 
                                            id="req_ref" name="req_ref" value="{{ old('req_ref') }}">
@@ -52,6 +62,10 @@
                                     @enderror
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="req_date_needed" class="form-label">Date Needed</label>
