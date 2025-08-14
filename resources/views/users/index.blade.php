@@ -6,9 +6,14 @@
 <div class="container">
     <h2>System Users</h2>
     <div class="mb-3">
-        @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
+        {{-- @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
             <a href="{{ route('users.create') }}" class="btn btn-success">Add User</a>
-        @endif
+        @endif --}}
+
+        @if(auth()->check() && in_array(strtolower(optional(auth()->user()->role)->ur_name), ['admin', 'administrator', 'supervisor']))
+    <a href="{{ route('users.create') }}" class="btn btn-success">Add User</a>
+@endif
+
     </div>
     <form method="GET" class="mb-3">
         <div class="row g-2">
@@ -47,8 +52,32 @@
                 <td>{{ $user->user_name }}</td>
                 <td>{{ $user->user_email }}</td>
                 <td>{{ $user->user_active ? 'Active' : 'Locked' }}</td>
-                <td>{{ $user->role ? $user->role->ur_name : '' }}</td>
-                <td>
+                <td>{{ optional($user->role)->ur_name ?? 'No Role' }}</td>
+
+@if(auth()->check() && in_array(
+    strtolower(optional(auth()->user()->role)->ur_name),
+    ['admin', 'administrator', 'supervisor']
+))
+    {{-- Action buttons here --}}
+@endif
+            </td>
+
+                {{-- <td>{{ $user->role ? $user->role->ur_name : '' }}</td> --}}
+
+               <td> @if(auth()->check() && in_array( strtolower(optional(auth()->user()->role)->ur_name),
+    ['admin', 'administrator', 'supervisor']
+))
+    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary btn-sm">Edit</a>
+    <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display:inline;"
+          onsubmit="return confirm('Are you sure you want to delete this user?');">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+    </form>
+@endif
+               </td>
+
+                {{-- <td>
                     @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
                         <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary btn-sm">Edit</a>
                         <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
@@ -57,11 +86,11 @@
                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                         </form>
                     @endif
-                </td>
+                </td> --}}
             </tr>
             @endforeach
         </tbody>
     </table>
     {{ $users->withQueryString()->links() }}
 </div>
-@endsection 
+@endsection

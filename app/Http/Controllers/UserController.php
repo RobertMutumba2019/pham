@@ -14,29 +14,55 @@ use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
+
+
+    public function index(Request $request)
+{
+    $query = User::with('role'); // Eager load the role relationship
+
+    // Search by keyword (name, email, username, or role name)
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('user_name', 'like', "%$search%")
+              ->orWhere('user_surname', 'like', "%$search%")
+              ->orWhere('user_email', 'like', "%$search%")
+              ->orWhereHas('role', function ($q2) use ($search) {
+                  $q2->where('ur_name', 'like', "%$search%");
+              });
+        });
+    }
+
+    // Pagination (default 20 per page, can be changed)
+    $perPage = $request->input('rowsPerPage', 20);
+    $users = $query->orderBy('user_surname')->paginate($perPage);
+
+    return view('users.index', compact('users'));
+}
+
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-    {
-        $query = User::query();
+    // public function index(Request $request)
+    // {
+    //     $query = User::query();
 
-        // Search by keyword (e.g., name, email, username)
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('user_name', 'like', "%$search%")
-                  ->orWhere('user_surname', 'like', "%$search%")
-                  ->orWhere('user_email', 'like', "%$search%");
-            });
-        }
+    //     // Search by keyword (e.g., name, email, username)
+    //     if ($request->filled('search')) {
+    //         $search = $request->search;
+    //         $query->where(function($q) use ($search) {
+    //             $q->where('user_name', 'like', "%$search%")
+    //               ->orWhere('user_surname', 'like', "%$search%")
+    //               ->orWhere('user_email', 'like', "%$search%");
+    //         });
+    //     }
 
-        // Pagination (default 20 per page, can be changed)
-        $perPage = $request->input('rowsPerPage', 20);
-        $users = $query->orderBy('user_surname')->paginate($perPage);
+    //     // Pagination (default 20 per page, can be changed)
+    //     $perPage = $request->input('rowsPerPage', 20);
+    //     $users = $query->orderBy('user_surname')->paginate($perPage);
 
-        return view('users.index', compact('users'));
-    }
+    //     return view('users.index', compact('users'));
+    // }
 
     /**
      * Show the form for creating a new resource.
@@ -53,7 +79,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            
+
             'user_surname' => 'required|string',
             'user_othername' => 'required|string',
             'user_email' => 'required|email|unique:users,user_email',
@@ -64,7 +90,7 @@ class UserController extends Controller
         // Generate username: first letter of first name + first letter of surname + unique 3-digit number
         $firstLetterFirstName = strtoupper(substr($request->user_othername, 0, 1));
         $firstLetterSurname = strtoupper(substr($request->user_surname, 0, 1));
-        
+
         // Find a unique 3-digit number
         $baseUsername = $firstLetterFirstName . $firstLetterSurname;
         $username = null;
@@ -97,7 +123,7 @@ class UserController extends Controller
             'user_role' => $request->user_role,
             'user_forgot_password' => 1,
             'user_active' => 1,
-            
+
         ]);
 
         // Send email notification to the user with username and password
