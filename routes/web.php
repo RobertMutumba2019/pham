@@ -44,7 +44,7 @@ Route::get('/workflows', [ApprovalWorkflowController::class, 'index'])->middlewa
 
 Route::resource('users', UserController::class);
 Route::resource('departments', DepartmentController::class);
-Route::resource('requisitions', RequisitionController::class);
+Route::resource('requisitions', RequisitionController::class)->middleware('auth');
 Route::resource('requisition-items', RequisitionItemController::class);
 Route::resource('user-roles', UserRoleController::class);
 Route::resource('access-rights', AccessRightController::class);

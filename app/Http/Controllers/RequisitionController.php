@@ -40,6 +40,12 @@ class RequisitionController extends Controller
      */
     public function store(Request $request)
     {
+        // Debug logging
+        \Log::info('RequisitionController@store called', [
+            'user_id' => $request->user() ? $request->user()->id : 'not authenticated',
+            'request_data' => $request->all()
+        ]);
+        
         // Validate input - updated to match form field names
         $validated = $request->validate([
             'req_title' => 'required|string|max:255',
@@ -66,10 +72,19 @@ class RequisitionController extends Controller
 
         DB::beginTransaction();
         try {
+            \Log::info('Starting requisition creation process');
+            
             // Create requisition
             $ref = $user->id . time();
             $status = $validated['action'] === 'draft' ? -1 : 1;
             $requisitionNumber = $validated['action'] === 'submit' ? $this->generateRequisitionNumber() : null;
+
+            \Log::info('Creating requisition with data', [
+                'req_number' => $requisitionNumber,
+                'req_title' => $validated['req_title'],
+                'req_division' => $validated['req_division'],
+                'status' => $status
+            ]);
 
             $requisition = Requisition::create([
                 'req_number' => $requisitionNumber,
@@ -85,40 +100,59 @@ class RequisitionController extends Controller
                 'req_status' => $status,
             ]);
 
+            \Log::info('Requisition created successfully', ['requisition_id' => $requisition->id]);
+
             // Create requisition items
-            foreach ($validated['items'] as $itemData) {
-                $requisition->items()->create([
+            foreach ($validated['items'] as $index => $itemData) {
+                \Log::info('Creating item', ['index' => $index, 'item_data' => $itemData]);
+                
+                $item = $requisition->items()->create([
                     'item_description' => $itemData['description'],
                     'item_quantity' => $itemData['quantity'],
                     'item_unit' => $itemData['unit'] ?? null,
                     'item_estimated_cost' => $itemData['estimated_cost'] ?? null,
                 ]);
+                
+                \Log::info('Item created successfully', ['item_id' => $item->id]);
             }
 
             // Handle file attachments
             if ($request->hasFile('attachments')) {
+                \Log::info('Processing attachments', ['count' => count($request->file('attachments'))]);
+                
                 foreach ($request->file('attachments') as $file) {
                     $path = $file->store('attachments', 'public');
-                    $requisition->attachments()->create([
+                    $attachment = $requisition->attachments()->create([
                         'file_path' => $path,
                         'original_name' => $file->getClientOriginalName(),
                         'file_size' => $file->getSize(),
                         'mime_type' => $file->getMimeType(),
                     ]);
+                    
+                    \Log::info('Attachment created', ['attachment_id' => $attachment->id]);
                 }
             }
 
             DB::commit();
+            \Log::info('Transaction committed successfully');
 
             $message = $validated['action'] === 'draft' 
                 ? 'Requisition saved as draft successfully!' 
                 : 'Requisition submitted successfully!';
+
+            \Log::info('Redirecting to requisition show page', ['requisition_id' => $requisition->id]);
 
             return redirect()->route('requisitions.show', $requisition->id)
                 ->with('success', $message);
 
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('Failed to create requisition', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return back()->withInput()->withErrors(['error' => 'Failed to create requisition: ' . $e->getMessage()]);
         }
     }
