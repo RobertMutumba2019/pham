@@ -40,33 +40,103 @@ class RequisitionController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate input
+        // Validate input - updated to match form field names
         $validated = $request->validate([
             'req_title' => 'required|string|max:255',
-            'req_division' => 'required|string|max:255',
+            'req_description' => 'required|string',
+            'req_priority' => 'required|in:Normal,High,Urgent',
+            'req_ref' => 'nullable|string|max:255',
+            'req_date_needed' => 'nullable|date',
+            'req_justification' => 'nullable|string',
             'items' => 'required|array|min:1',
-            'items.*.ri_code' => 'required|string|max:255',
-            'items.*.ri_quantity' => 'required|numeric|min:1',
-            'items.*.ri_uom' => 'required|string|max:255',
-            'items.*.ri_description' => 'required|string|max:255',
-            'action' => 'required|in:draft,forward',
+            'items.*.description' => 'required|string|max:255',
+            'items.*.quantity' => 'required|numeric|min:1',
+            'items.*.unit' => 'nullable|string|max:50',
+            'items.*.estimated_cost' => 'nullable|numeric|min:0',
+            'action' => 'required|in:draft,submit',
+            'attachments.*' => 'nullable|file|max:10240', // 10MB max per file
         ]);
 
         $user = $request->user();
         // Check if user is an approver (cannot create requisition)
         if ($user->role && $user->role->is_approver) {
-            return response()->json(['error' => 'You cannot create any requisition because you are an Approver'], 403);
+            return back()->withErrors(['error' => 'You cannot create any requisition because you are an Approver']);
         }
 
-        // Delegate to service
-        $service = app(\App\Services\RequisitionService::class);
-        $result = $service->createRequisition($user, $validated);
+        DB::beginTransaction();
+        try {
+            // Create requisition
+            $ref = $user->id . time();
+            $status = $validated['action'] === 'draft' ? -1 : 1;
+            $requisitionNumber = $validated['action'] === 'submit' ? $this->generateRequisitionNumber() : null;
 
-        if (isset($result['error'])) {
-            return response()->json(['error' => $result['error']], 422);
+            $requisition = Requisition::create([
+                'req_number' => $requisitionNumber,
+                'req_title' => $validated['req_title'],
+                'req_description' => $validated['req_description'],
+                'req_priority' => $validated['req_priority'],
+                'req_ref' => $validated['req_ref'] ?? $ref,
+                'req_date_needed' => $validated['req_date_needed'],
+                'req_justification' => $validated['req_justification'],
+                'req_added_by' => $user->id,
+                'req_date_added' => now(),
+                'req_status' => $status,
+            ]);
+
+            // Create requisition items
+            foreach ($validated['items'] as $itemData) {
+                $requisition->items()->create([
+                    'item_description' => $itemData['description'],
+                    'item_quantity' => $itemData['quantity'],
+                    'item_unit' => $itemData['unit'] ?? null,
+                    'item_estimated_cost' => $itemData['estimated_cost'] ?? null,
+                ]);
+            }
+
+            // Handle file attachments
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    $path = $file->store('attachments', 'public');
+                    $requisition->attachments()->create([
+                        'file_path' => $path,
+                        'original_name' => $file->getClientOriginalName(),
+                        'file_size' => $file->getSize(),
+                        'mime_type' => $file->getMimeType(),
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            $message = $validated['action'] === 'draft' 
+                ? 'Requisition saved as draft successfully!' 
+                : 'Requisition submitted successfully!';
+
+            return redirect()->route('requisitions.show', $requisition->id)
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->withErrors(['error' => 'Failed to create requisition: ' . $e->getMessage()]);
         }
+    }
 
-        return response()->json(['message' => 'Requisition created successfully', 'requisition' => $result['requisition']], 201);
+    /**
+     * Generate a new requisition number
+     */
+    private function generateRequisitionNumber()
+    {
+        $dm = date('y') . date('m');
+        $suffix = "RQN" . $dm;
+        $last = Requisition::whereNotNull('req_number')
+            ->where('req_number', 'like', $suffix . '%')
+            ->orderByDesc('id')
+            ->first();
+        $next = 1;
+        if ($last && preg_match('/RQN\d{4}(\d+)/', $last->req_number, $matches)) {
+            $next = intval($matches[1]) + 1;
+        }
+        return $suffix . str_pad($next, 4, '0', STR_PAD_LEFT);
     }
 
     /**

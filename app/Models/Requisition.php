@@ -12,8 +12,12 @@ class Requisition extends Model
     protected $fillable = [
         'req_number',
         'req_title',
+        'req_description',
+        'req_priority',
         'req_division',
         'req_ref',
+        'req_date_needed',
+        'req_justification',
         'req_added_by',
         'req_date_added',
         'req_status',
@@ -28,7 +32,7 @@ class Requisition extends Model
     // Relationships
     public function items()
     {
-        return $this->hasMany(RequisitionItem::class, 'ri_ref', 'req_ref');
+        return $this->hasMany(RequisitionItem::class, 'requisition_id');
     }
 
     public function user()

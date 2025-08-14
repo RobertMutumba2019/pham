@@ -7,6 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class RequisitionItem extends Model
 {
     protected $fillable = [
+        'requisition_id',
+        'item_description',
+        'item_quantity',
+        'item_unit',
+        'item_estimated_cost',
+        // Keep old fields for backward compatibility
         'ri_code',
         'ri_quantity',
         'ri_uom',
@@ -14,9 +20,14 @@ class RequisitionItem extends Model
         'ri_ref',
     ];
 
-    // Example relationship: a requisition item belongs to a requisition
+    protected $casts = [
+        'item_estimated_cost' => 'decimal:2',
+        'item_quantity' => 'integer',
+    ];
+
+    // Relationship: a requisition item belongs to a requisition
     public function requisition()
     {
-        return $this->belongsTo(Requisition::class, 'ri_ref', 'req_ref');
+        return $this->belongsTo(Requisition::class);
     }
 }
