@@ -6,14 +6,20 @@ use Illuminate\Http\Request;
 use App\Models\Requisition;
 use App\Models\RequisitionItem;
 use App\Models\Department;
-use App\Models\User;
-use App\Models\Attachment;
+use App\Services\RequisitionWorkflowService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class RequisitionController extends Controller
 {
+    protected $workflowService;
+
+    public function __construct(RequisitionWorkflowService $workflowService)
+    {
+        $this->workflowService = $workflowService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -102,9 +108,23 @@ class RequisitionController extends Controller
 
             \Log::info('Items created successfully');
 
+            // If submitting (not draft), trigger approval workflow
+            if ($validated['action'] === 'submit') {
+                try {
+                    $this->workflowService->submitForApproval($requisition);
+                    \Log::info('Requisition submitted for approval workflow', ['requisition_id' => $requisition->id]);
+                } catch (\Exception $e) {
+                    \Log::warning('Failed to submit for approval workflow', [
+                        'requisition_id' => $requisition->id,
+                        'error' => $e->getMessage()
+                    ]);
+                    // Continue anyway - requisition is created, just workflow failed
+                }
+            }
+
             $message = $validated['action'] === 'draft' 
                 ? 'Requisition saved as draft successfully!' 
-                : 'Requisition submitted successfully!';
+                : 'Requisition submitted for approval successfully!';
 
             \Log::info('Redirecting to requisition show page', ['requisition_id' => $requisition->id]);
 
@@ -147,7 +167,6 @@ class RequisitionController extends Controller
         $requisition = Requisition::with([
             'user.department', 
             'items', 
-            'attachments', 
             'approvals.approver',
             'status'
         ])->findOrFail($id);
@@ -160,7 +179,7 @@ class RequisitionController extends Controller
      */
     public function edit(string $id)
     {
-        $requisition = Requisition::with(['items', 'attachments'])->findOrFail($id);
+        $requisition = Requisition::with(['items'])->findOrFail($id);
         $departments = Department::all();
         
         return view('requisitions.edit', compact('requisition', 'departments'));

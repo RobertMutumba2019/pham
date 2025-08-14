@@ -50,10 +50,10 @@ class Requisition extends Model
         return $this->hasMany(RequisitionApproval::class, 'requisition_id');
     }
 
-    public function attachments()
-    {
-        return $this->morphMany(Attachment::class, 'attachable');
-    }
+    // public function attachments()
+    // {
+    //     return $this->morphMany(Attachment::class, 'attachable');
+    // }
 
     // Scopes
     public function scopeByStatus($query, $status)
