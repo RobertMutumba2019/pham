@@ -16,7 +16,7 @@
 
     </div>
     <form method="GET" class="mb-3">
-        <div class="row g-2">
+       
             <div class="col-md-4">
                 <input type="text" name="search" class="form-control" placeholder="Search users..." value="{{ request('search') }}">
             </div>
@@ -30,6 +30,22 @@
             <div class="col-md-2">
                 <button class="btn btn-primary" type="submit">Search</button>
             </div>
+
+            {{-- <div class="mb-3 d-flex justify-content-end">
+    @if(auth()->check() && in_array(strtolower(optional(auth()->user()->role)->ur_name), ['admin', 'administrator', 'supervisor']))
+        <a href="{{ route('users.create') }}" class="btn btn-sm btn-success">
+            <i class="bi bi-person-plus"></i> Create User
+        </a>
+    @endif
+</div> --}}
+
+    <div class="mb-3 d-flex justify-content-end">@if(auth()->check())
+    <a href="{{ route('users.create') }}" class="btn btn-sm btn-success">
+        Create User
+    </a>
+@endif
+    </div>
+
         </div>
     </form>
     <table class="table table-bordered">
@@ -64,6 +80,19 @@
 
                 {{-- <td>{{ $user->role ? $user->role->ur_name : '' }}</td> --}}
 
+
+             <td>@if(auth()->check())
+    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary btn-sm">Edit</a>
+    <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display:inline;"
+          onsubmit="return confirm('Are you sure you want to delete this user?');">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+    </form>
+@endif
+  </td>
+
+{{--
                <td> @if(auth()->check() && in_array( strtolower(optional(auth()->user()->role)->ur_name),
     ['admin', 'administrator', 'supervisor']
 ))
@@ -75,7 +104,7 @@
         <button type="submit" class="btn btn-danger btn-sm">Delete</button>
     </form>
 @endif
-               </td>
+               </td> --}}
 
                 {{-- <td>
                     @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))

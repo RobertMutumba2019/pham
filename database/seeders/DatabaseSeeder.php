@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Seeder;
+
 use App\Models\User;
 
 class DatabaseSeeder extends Seeder
@@ -13,7 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::updateOrCreate(
+
         User::updateOrCreate(
             ['user_name' => 'testuser'],
             [
