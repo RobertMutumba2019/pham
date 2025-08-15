@@ -9,12 +9,16 @@
         <div class="alert alert-success">{{ session('status') }}</div>
     @endif
     <div class="mb-3">
-        @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
+        {{-- @if(auth()->check() && in_array(strtolower(auth()->user()->role->ur_name), ['admin', 'administrator', 'supervisor']))
             <a href="{{ route('user-roles.create') }}" class="btn btn-success">Add Role</a>
-        @endif
+        @endif --}}
+         @if(auth()->check() && in_array(strtolower(optional(auth()->user()->role)->ur_name), ['admin', 'administrator', 'supervisor']))
+    <a href="{{ route('user-roles.create') }}" class="btn btn-success">Add Role</a>
+@endif
+
     </div>
     <table class="table table-bordered">
-        <thead>
+        <thead>b 
             <tr>
                 <th>Name</th>
                 <th>Added By</th>
@@ -44,4 +48,4 @@
     </table>
     {{ $roles->links() }}
 </div>
-@endsection 
+@endsection

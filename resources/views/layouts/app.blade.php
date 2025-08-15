@@ -112,8 +112,13 @@
                     <li class="nav-item">
                         <a href="{{ route('users.edit', Auth::id()) }}" class="nav-link"><i class="fas fa-user-cog me-2"></i> Account Settings</a>
                     </li>
+
                     <li class="nav-item">
                         <a href="{{ route('users.change-password.form') }}" class="nav-link"><i class="fas fa-key me-2"></i> Update Credentials</a>
+                    </li>
+                    {{-- added User Role --}}
+                    <li class="nav-item">
+                        <a href="{{ route('user-roles.index') }}" class="nav-link"><i class="fas fa-key me-2"></i> User Role</a>
                     </li>
                     <li class="nav-item">
                         <form action="{{ route('logout') }}" method="POST" class="d-inline">
