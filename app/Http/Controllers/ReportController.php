@@ -18,42 +18,78 @@ use Carbon\Carbon;
 class ReportController extends Controller
 {
     // Serial Number Finder Report - Enhanced with multiple table search
+    // public function serialNumberFinder(Request $request)
+    // {
+    //     $search = $request->input('search');
+    //     $searchType = $request->input('search_type', 'c'); // c=contains, e=ends, s=starts, p=exact
+    //     $requisitions = [];
+
+    //     if ($search) {
+    //         $searchCondition = $this->getSearchCondition($searchType, $search);
+
+    //         // Search in requisitions
+    //         $requisitions = DB::table('requisitions as r')
+    //             ->leftJoin('users as u', 'r.req_added_by', '=', 'u.id')
+    //             ->leftJoin('departments as d', 'u.user_department_id', '=', 'd.id')
+    //             ->select('r.req_id as id', 'r.req_number as number', 'r.req_date_added as date_added',
+    //                     'u.user_name', 'u.user_surname', 'd.dept_name',
+    //                     DB::raw("'requisition' as type"), DB::raw("'requisition/view-requisition/' as link_prefix"))
+    //             ->whereRaw("r.req_number $searchCondition")
+    //             ->orWhereRaw("r.req_title $searchCondition")
+    //             ->get();
+
+    //         // $requisitions = $requisitions ->toArray();
+    //          $requisitions = $query->paginate(20)->withQueryString();
+
+    //     }
+
+    //     return view('reports.serial_number_finder',
+    //     compact('requisitions', 'search', 'searchType'));
+    // }
+
+    // private function getSearchCondition($type, $search)
+    // {
+    //     switch ($type) {
+    //         case 'c': return "LIKE '%$search%'";
+    //         case 'e': return "LIKE '%$search'";
+    //         case 's': return "LIKE '$search%'";
+    //         case 'p': return "= '$search'";
+    //         default: return "LIKE '%$search%'";
+    //     }
+    // }
+
     public function serialNumberFinder(Request $request)
-    {
-        $search = $request->input('search');
-        $searchType = $request->input('search_type', 'c'); // c=contains, e=ends, s=starts, p=exact
-        $results = [];
-        
-        if ($search) {
-            $searchCondition = $this->getSearchCondition($searchType, $search);
-            
-            // Search in requisitions
-            $requisitions = DB::table('requisitions as r')
-                ->leftJoin('users as u', 'r.req_added_by', '=', 'u.id')
-                ->leftJoin('departments as d', 'u.user_department_id', '=', 'd.id')
-                ->select('r.req_id as id', 'r.req_number as number', 'r.req_date_added as date_added', 
-                        'u.user_name', 'u.user_surname', 'd.dept_name', 
-                        DB::raw("'requisition' as type"), DB::raw("'requisition/view-requisition/' as link_prefix"))
-                ->whereRaw("r.req_number $searchCondition")
-                ->orWhereRaw("r.req_title $searchCondition")
-                ->get();
-            
-            $results = $requisitions->toArray();
-        }
-        
-        return view('reports.serial_number_finder', compact('results', 'search', 'searchType'));
+{
+    $search = $request->input('search');
+    $searchType = $request->input('search_type', 'c'); // c=contains, e=ends, s=starts, p=exact
+
+    // Start query
+    $query = DB::table('requisitions as r')
+        ->leftJoin('users as u', 'r.req_added_by', '=', 'u.id')
+        ->leftJoin('departments as d', 'u.user_department_id', '=', 'd.id')
+        ->select(
+            'r.req_id as id',
+            'r.req_number as number',
+            'r.req_date_added as date_added',
+            'u.user_name',
+            'u.user_surname',
+            'd.dept_name',
+            DB::raw("'requisition' as type"),
+            DB::raw("'requisition/view-requisition/' as link_prefix")
+        );
+
+    if ($search) {
+        $searchCondition = $this->getSearchCondition($searchType, $search);
+        $query->whereRaw("r.req_number $searchCondition")
+              ->orWhereRaw("r.req_title $searchCondition");
     }
-    
-    private function getSearchCondition($type, $search)
-    {
-        switch ($type) {
-            case 'c': return "LIKE '%$search%'";
-            case 'e': return "LIKE '%$search'";
-            case 's': return "LIKE '$search%'";
-            case 'p': return "= '$search'";
-            default: return "LIKE '%$search%'";
-        }
-    }
+
+    // Paginate instead of get()->toArray()
+    $requisitions = $query->paginate(20)->withQueryString();
+
+    return view('reports.serial_number_finder', compact('requisitions', 'search', 'searchType'));
+}
+
 
     // Summary List Report - Enhanced with filters and export
     public function summaryList(Request $request)
@@ -63,13 +99,13 @@ class ReportController extends Controller
         $department = $request->input('department');
         $status = $request->input('status');
         $export = $request->input('export');
-        
+
         $query = DB::table('requisitions as r')
             ->leftJoin('users as u', 'r.req_added_by', '=', 'u.id')
             ->leftJoin('departments as d', 'u.user_department_id', '=', 'd.id')
             ->leftJoin('requisition_statuses as rs', 'r.req_status_id', '=', 'rs.id')
             ->select('r.*', 'u.user_name', 'u.user_surname', 'd.dept_name', 'rs.status_name');
-        
+
         // Apply filters
         if ($dateFrom) {
             $query->where('r.req_date_added', '>=', $dateFrom);
@@ -83,10 +119,10 @@ class ReportController extends Controller
         if ($status) {
             $query->where('r.req_status_id', $status);
         }
-        
+
         $requisitions = $query->paginate(50);
         $departments = Department::all();
-        
+
         // Handle export
         if ($export === 'excel') {
             return Excel::download(new RequisitionsExport($query->get()), 'summary_list.xlsx');
@@ -96,7 +132,7 @@ class ReportController extends Controller
             $pdf = Pdf::loadView('reports.summary_list_pdf', compact('data'));
             return $pdf->download('summary_list.pdf');
         }
-        
+
         return view('reports.summary_list', compact('requisitions', 'departments', 'dateFrom', 'dateTo', 'department', 'status'));
     }
 
@@ -108,18 +144,18 @@ class ReportController extends Controller
             ->leftJoin('users', 'vehicle_requests.requested_by', '=', 'users.id')
             ->select('vehicle_requests.*', 'users.user_name', 'users.user_surname')
             ->paginate(20);
-            
+
         // Get vehicle returns with user information
         $vehicleReturns = DB::table('vehicle_returns')
             ->leftJoin('users as returned_by_user', 'vehicle_returns.returned_by', '=', 'returned_by_user.id')
             ->leftJoin('users as received_by_user', 'vehicle_returns.received_by', '=', 'received_by_user.id')
-            ->select('vehicle_returns.*', 
-                    'returned_by_user.user_name as returned_by_name', 
+            ->select('vehicle_returns.*',
+                    'returned_by_user.user_name as returned_by_name',
                     'returned_by_user.user_surname as returned_by_surname',
-                    'received_by_user.user_name as received_by_name', 
+                    'received_by_user.user_name as received_by_name',
                     'received_by_user.user_surname as received_by_surname')
             ->paginate(20);
-            
+
         return view('reports.territory_vehicle_request_and_return', compact('vehicleRequests', 'vehicleReturns'));
     }
 
@@ -127,16 +163,16 @@ class ReportController extends Controller
     public function exportUsers(Request $request)
     {
         $format = $request->input('format', 'excel');
-        
+
         if ($format === 'pdf') {
             $users = User::with('department')->get();
             $pdf = Pdf::loadView('reports.users_pdf', compact('users'));
             return $pdf->download('users.pdf');
         }
-        
+
         return Excel::download(new UsersExport, 'users.xlsx');
     }
-    
+
     // Advanced Reporting Dashboard
     public function dashboard(Request $request)
     {
@@ -148,28 +184,28 @@ class ReportController extends Controller
             'total_users' => User::count(),
             'total_departments' => Department::count(),
         ];
-        
+
         // Monthly requisition trends
         $monthlyTrends = DB::table('requisitions')
-            ->select(DB::raw('YEAR(req_date_added) as year'), 
-                    DB::raw('MONTH(req_date_added) as month'), 
+            ->select(DB::raw('YEAR(req_date_added) as year'),
+                    DB::raw('MONTH(req_date_added) as month'),
                     DB::raw('COUNT(*) as count'))
             ->where('req_date_added', '>=', Carbon::now()->subMonths(12))
             ->groupBy('year', 'month')
             ->orderBy('year', 'desc')
             ->orderBy('month', 'desc')
             ->get();
-        
+
         return view('reports.dashboard', compact('stats', 'monthlyTrends'));
     }
-    
+
     // Department-wise Report
     public function departmentReport(Request $request)
     {
         $departmentId = $request->input('department_id');
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
-        
+
         $query = DB::table('requisitions as r')
             ->leftJoin('users as u', 'r.req_added_by', '=', 'u.id')
             ->leftJoin('departments as d', 'u.user_department_id', '=', 'd.id')
@@ -178,7 +214,7 @@ class ReportController extends Controller
                     DB::raw('SUM(CASE WHEN r.req_status_id = 3 THEN 1 ELSE 0 END) as rejected'),
                     DB::raw('SUM(CASE WHEN r.req_status_id = 1 THEN 1 ELSE 0 END) as pending'))
             ->groupBy('d.id', 'd.dept_name');
-        
+
         if ($departmentId) {
             $query->where('d.id', $departmentId);
         }
@@ -188,10 +224,10 @@ class ReportController extends Controller
         if ($dateTo) {
             $query->where('r.req_date_added', '<=', $dateTo);
         }
-        
+
         $departmentStats = $query->get();
         $departments = Department::all();
-        
+
         return view('reports.department_report', compact('departmentStats', 'departments', 'departmentId', 'dateFrom', 'dateTo'));
     }
-} 
+}

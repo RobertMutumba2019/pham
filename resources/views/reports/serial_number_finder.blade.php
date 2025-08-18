@@ -37,9 +37,9 @@
     </table>
     {{ $requisitions->withQueryString()->links() }}
 </div>
-@endsection 
+@endsection
 
-@section('content')
+{{-- @section('content')
 <div class="container">
     <h2>Serial Number Finder</h2>
     <form method="GET" action="{{ route('reports.serial_number_finder') }}" class="mb-3">
@@ -76,4 +76,4 @@
     </table>
     {{ $requisitions->withQueryString()->links() }}
 </div>
-@endsection 
+@endsection  --}}

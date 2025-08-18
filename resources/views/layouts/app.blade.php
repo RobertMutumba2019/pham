@@ -106,7 +106,7 @@
                         <a href="{{ route('workflows.index') }}" class="nav-link {{ request()->routeIs('workflows.*') || request()->routeIs('approval-workflows.*') ? 'active' : '' }}"><i class="fas fa-sitemap me-2"></i> Workflows</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('reports.dashboard') }}" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="fas fa-chart-bar me-2"></i> Reports</a>
+                        <a href="{{ route('reports.serial_number_finder') }}" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="fas fa-chart-bar me-2"></i> Reports</a>
                     </li>
                     @if(Auth::check())
                     <li class="nav-item">
